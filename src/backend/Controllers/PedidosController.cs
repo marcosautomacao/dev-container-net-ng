@@ -30,30 +30,18 @@ public class PedidosController : ControllerBase
     [HttpDelete("{id:guid}")]
     public IActionResult DeletePedido(Guid id)
     {
-        var todosPedidos = _context.Pedidos.AsNoTracking().Include(x => x.Itens).ToList();
+        var pedido = _context.Pedidos.AsNoTracking()
+            .Include(x => x.Itens )
+            .Where(y => y.Id == id ).ToList().FirstOrDefault();
 
-        Pedido? pedidoAtual = null;
-        foreach(var pedido in todosPedidos)
-        {
-            if(pedido.Id.Equals(id))
-            {
-                pedidoAtual = pedido;
-            }
-        }
-
-        if (pedidoAtual == null)
+        if (pedido == null)
         {
             return NotFound();
         }
         else
         {
-            _context.Pedidos.RemoveRange(todosPedidos);
-            _context.SaveChanges();
-
-            todosPedidos.Remove(pedidoAtual);
-            _context.AddRange(todosPedidos);
-            _context.SaveChanges();
-            
+            _context.Pedidos.Remove(pedido);
+            _context.SaveChanges();            
             return Ok();
         }
         
@@ -72,6 +60,7 @@ public class PedidosController : ControllerBase
             Data = new DateTime(),
             Status = StatusPedido.NoCarrinho,
             DescontoPercentual = dto.DescontoPercentual,
+            Total = dto.Itens.Sum(i => i.Preco)*(1/dto.DescontoPercentual),
             Itens = dto.Itens.Select(i => new ItemPedido
             {
                 Nome = i.Nome,

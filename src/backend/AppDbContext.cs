@@ -79,7 +79,7 @@ public class AppDbContext : DbContext
                       .UseIdentityColumn(); 
 
             entity.Property(i => i.Nome)
-                  .HasMaxLength(25)
+                  .HasMaxLength(40)
                   .IsRequired();
 
             entity.Property(i => i.Preco)
